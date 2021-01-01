@@ -1,5 +1,5 @@
 # input: Note Sequence
-# output: MIDI
+# output: Note Sequence
 
 from magenta.models.melody_rnn import melody_rnn_sequence_generator
 from magenta.models.melody_rnn import melody_rnn_model
@@ -8,7 +8,7 @@ from note_seq.protobuf import generator_pb2
 from note_seq.protobuf import music_pb2
 
 
-def main_melody_generator(user_sequence, num_steps=128, temperature=1.0, qpm=120):
+def melody_generator(user_sequence, num_steps=128, temperature=1.0, qpm=120):
   # Melody rnn initialization
   bundle = sequence_generator_bundle.read_bundle_file('./bundle/attention_melody_rnn.mag')
   config_id = bundle.generator_details.id
@@ -27,9 +27,7 @@ def main_melody_generator(user_sequence, num_steps=128, temperature=1.0, qpm=120
 
   generator_options.args['temperature'].float_value = temperature
 
-  main_melody_sequence = generator.generate(user_sequence, generator_options)
-
-  return main_melody_sequence
+  return generator.generate(user_sequence, generator_options)
 
 
 
