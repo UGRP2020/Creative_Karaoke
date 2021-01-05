@@ -22,10 +22,3 @@ def base_generator(roots_sequence, num_steps=16, temperature=0.5, qpm=120, chord
         
     base_sequence = concatenate_sequences(base_sequences_list)
     return base_sequence
-
-
-
-
-
-
-    

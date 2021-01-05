@@ -88,3 +88,22 @@ def flatten_trills(sequence):
       elif note.pitch==second or note.pitch==first:
         trills.append(note)
     i+=1
+
+def crepe_to_raw_note_sequence(freq_list,conf_list,confidence=0.6):
+      vocal_note_sequence = music_pb2.NoteSequence()
+      for i in range(len(freq_list)):
+        ptch = freq_2_pitch(freq_list[i])
+        if ptch != None and conf_list[i] > confidence: # valid note
+          vocal_note_sequence.notes.add(pitch = ptch, start_time = time_step*(i), end_time = time_step*(i+1), velocity = 80) 
+      return vocal_note_sequence
+
+def crepe_to_note_sequenece(freq,conf,merge=True,deviation=True,trills=False):
+      seq = crepe_to_raw_note_sequence(freq,conf)
+      if merge:
+            merge_continuous_notes(seq)
+      if deviation:
+            remove_deviations(seq)
+      if trills:
+            flatten_trills(seq)
+
+      return seq

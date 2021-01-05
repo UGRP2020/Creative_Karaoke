@@ -1,5 +1,5 @@
 import pretty_midi
-from visual_midi import Plotter
+from note_seq import sequences_lib
 
 def tempo_and_onset(midi_data, integer_tempo=True, steps_per_quarter=1):
     """
@@ -19,15 +19,21 @@ def tempo_and_onset(midi_data, integer_tempo=True, steps_per_quarter=1):
 
     return tempo, onset_time
 
-def main():
-    path = "data/BillieJean.mid"
-    midi_data = pretty_midi.PrettyMIDI(path)
+def quantization_and_preparation(sequence, tempo, onset=False):
+      # set tempo of sequence
+      if len(sequence.tempos)==0:
+            sequence.tempos.add()
+      sequence.tempos[0].qpm = tempo
 
-    est_tp, est_onst = tempo_and_onset(midi_data)
-    print(est_tp, est_onst)
-    plotter = Plotter()
-    plotter.show(midi_data,'tmp/example.html')
+      step_per_quarter = 1
+      sequence = sequences_lib.quantize_note_sequence(sequence,step_per_quarter)
 
+      if onset != False:
+        new_start_offset(sequence, onset)
 
-if __name__=="__main__":
-    main()
+def new_start_offset(sequence, onset):
+    for nt in sequence.notes:
+        nt.start_time -= onset
+        nt.end_time -= onset
+        if nt.start_time<0:
+            sequence.notes.remove(nt)

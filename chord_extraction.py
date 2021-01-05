@@ -2,10 +2,32 @@ from note_seq import chord_inference
 from note_seq import chord_symbols_lib
 from note_seq import chords_lib
 from note_seq import sequences_lib
+import beat_estimation
 import os
 import pretty_midi
+from note_seq import music_pb2
+import note_seq
 
-def extract_chords_as_note_seq(sequence,major_minor = True, triads = True, inversion=False,_chords_per_bar = 1):
+def extract_chords_from_midi(filepath):
+      """
+      Extracts chords from midi file
+      Refer to extract_chords_from_note_sequence(...)
+      """
+      # convert midi file into note sequence
+      midi_data = pretty_midi.PrettyMIDI(filepath)
+      seq = note_seq.midi_to_note_sequence(midi_data)
+      chords = extract_chords_from_note_sequence(seq)
+
+      return chords
+
+def extract_chords_from_note_sequence(sequence,major_minor = True, triads = True, inversion=False,_chords_per_bar = 1):
+  """
+  Extracts chords from note sequence
+
+  Input sequence must be quantized
+  Returns a note sequence with chords for each bar
+  """
+  
   chords = music_pb2.NoteSequence()
 
   try:
@@ -71,8 +93,38 @@ def extract_roots_as_note_seq(sequence, _chords_per_bar=1):
         roots.notes.add(pitch=note+60,start_time=chord.time, end_time = chord.time+duration,velocity = 80)
         break
         
-  return roots
+  return roots 
 
+
+
+def midi_split_into_bars(filepath):
+      if not filepath.endswith('.mid'):
+            return
+      
+      midi_data = pretty_midi.PrettyMIDI(filepath)
+      seq = note_seq.midi_to_note_sequence(midi_data)
+      
+      estimated_tempo, estimated_onset = beat_estimation.tempo_and_onset(midi_data)
+      beat_estimation.quantization_and_preparation(seq, estimated_tempo,estimated_onset)
+
+      bars = music_pb2.NoteSequence()
+      beat_estimation.quantization_and_preparation(bars,estimated_tempo)
+      
+      seconds_per_bar = 60/estimated_tempo*4
+
+      time =0
+      while time<seq.total_time:
+            bars.notes.add(pitch=60, start_time = time, end_time = time+0.5,velocity= 80)
+            time += seconds_per_bar
+
+      return seq, bars
+
+
+      
+if __name__=="__main__":
+      midi_split_into_bars('data/BillieJean.mid')
+
+""" 
 def melody_and_chords(seq, onset_detection = True):
   # get estimated tempo of melody and set as qpm
     estimated_tempo = midi_data.estimate_tempo()
@@ -104,7 +156,7 @@ def melody_and_chords(seq, onset_detection = True):
     play_and_plot(combined)
 
 
-"""    
+   
 def extract_chords_as_note_seq(sequence,triads = True):
   chords = music_pb2.NoteSequence()
 
