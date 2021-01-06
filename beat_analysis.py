@@ -59,7 +59,7 @@ def adjust_sequence_to_onset(sequence, onset):
 
 def convert_beat_annotation_to_note_sequence(sequence, beat_pitch = None):
     """
-    Converts text annotations within note sequence into a separate note sequence
+    Converts text annotations (of type BEAT) within note sequence into a separate note sequence
     """
     seq = music_pb2.NoteSequence()
 
