@@ -1,6 +1,6 @@
 from pydub import AudioSegment
 import os
-import beat_analysis
+from beat_analysis import tempo_and_onset
 import crepe
 import csv
 import pitch_detection
@@ -46,10 +46,11 @@ def wav_to_midi(filepath, use_atmm=False , _smooth=0.25, _minduration=0.1):
 
       # Convert into NoteSequence and do basic trimming
       seq = pitch_detection.crepe_to_note_sequenece(frequency, confidence)
+      print(seq)
       seq_to_mid = note_seq.note_sequence_to_pretty_midi(seq)
 
       # Extract tempo and onset estimation from midi
-      estimated_tempo, estimated_start = beat_analysis.tempo_and_onset(seq_to_mid)
+      estimated_tempo, estimated_start = tempo_and_onset(seq_to_mid)
 
       # Fix Onset to start of file, set tempo, and save as Midi File
       if use_atmm:
@@ -59,11 +60,12 @@ def wav_to_midi(filepath, use_atmm=False , _smooth=0.25, _minduration=0.1):
                               smooth=_smooth, minduration=_minduration)
       else:
             # When not using atmm, file will be re-named with '.mid'
-            beat_analysis.quantization_and_preparation(seq,estimated_tempo, estimated_start)
+            #beat_analysis.quantization_and_preparation(seq,estimated_tempo, estimated_start)
             note_seq.note_sequence_to_midi_file(seq,filepath.split('.')[0] + '.mid')
 
 
 if __name__=="__main__":
   #wav_to_midi('data/twinkle.wav',use_atmm=False)
-  newAudio = AudioSegment.from_file(file='data/twinkle.wav',format="wav") #data/twinkle.wav"
+  #newAudio = AudioSegment.from_file(file='data/twinkle.wav',format="wav") #data/twinkle.wav"
+  wav_to_midi('data/wav/PianoMan.wav')
   

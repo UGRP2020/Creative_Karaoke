@@ -2,10 +2,15 @@ from note_seq.protobuf import music_pb2
 from note_seq import sequences_lib
 import note_seq
 import pretty_midi
-
 import utils
 
-def tempo_and_onset(midi_data, integer_tempo=True, steps_per_quarter=1):
+def txt_to_list(filename):
+    with open(filename) as f:
+        content = f.readlines()
+    content = [x.strip() for x in content] 
+    return content
+
+def tempo_and_onset(midi_data, integer_tempo=True, steps_per_quarter=4):
     """
     Extracts tempo and onset(start time of first estimated beat) of the given midi data
         using functionality provided by pretty_midi
@@ -72,7 +77,7 @@ def convert_beat_annotation_to_note_sequence(sequence, beat_pitch = None):
     """
     for ta in sequence.text_annotations:
         if ta.annotation_type == music_pb2.NoteSequence.TextAnnotation.BEAT:
-            seq.notes.add(pitch=beat_pitch, start_time = ta.time, end_time = ta.time+0.5,velocity = 80 if ta.quantized_step % 4==1 else 40)
+            seq.notes.add(pitch=beat_pitch, start_time = ta.time, end_time = ta.time+0.5,velocity = 100 if ta.quantized_step % 4==1 else 40)
 
     return seq
 
@@ -118,21 +123,35 @@ def midi_to_sequence(filepath, beat_analysis = True):
     if beat_analysis:
         # set tempo and move file to start @ onset (note sequence now)
         adjust_sequence_to_onset(seq,start_time)
-        set_tempo(seq,tempo)
-
+        set_tempo(seq,tempo/2)
+        
         # add beat annotations (to note sequence)
         add_beat_annotations(seq)
     
     return seq
 
+def add_beat_annotations(sequence, filename):
+    beats = txt_to_list(filename)
+    for beat in beats:
+        ta = sequence.text_annotations.add()
+        ta.annotation_type = music_pb2.NoteSequence.TextAnnotation.BEAT
+        ta.time = float(beat)
+
 if __name__=="__main__":
     folder = 'data/midi/'
-    files = ['PianoMan.mid']
+
+    
+    """
+    files = ['AWholeNewWorld.mid']
     for file in files:
         filepath = folder+file
-        seq = midi_to_sequence(filepath)
+        title = file.split('.')[0]
+
+        seq = midi_to_sequence(filepath, beat_analysis=False)
+        add_beat_annotations(seq,'results/aubio/'+title+'.txt')
         beat_seq = convert_beat_annotation_to_note_sequence(seq)
 
         # combine beats with melody
-        midpath = 'results/mid/beats_combined_no_adjustment.mid'
+        midpath = 'results/mid/'+file
         utils.combine_note_sequence_as_midi([beat_seq, seq],midpath)
+    """

@@ -3,6 +3,7 @@ from note_seq import sequences_lib
 from note_seq.protobuf import music_pb2
 import pretty_midi
 import visual_midi
+
 def play_and_plot(_seq):
   """
   Works only in Google colab
@@ -28,7 +29,6 @@ def combine_note_sequence_as_midi(sequences,filepath):
             else:
                   program_number = default_program
 
-            print('program is '+str(program_number))
             inst = pretty_midi.Instrument(program=program_number)
             for nt in seq.notes:
                   note = pretty_midi.Note(velocity = nt.velocity,pitch = nt.pitch,start = nt.start_time, end = nt.end_time)
@@ -39,18 +39,6 @@ def combine_note_sequence_as_midi(sequences,filepath):
       save_plot(filepath)
       print(str(len(sequences))+' sequences combined and saved as '+filepath)
 
-      """
-      # need to extract only the note information for the first sequence
-      # mixing notes with program number assigned gives weird results (i think)
-
-      first = music_pb2.NoteSequence()
-      for nt in sequences[0].notes:
-            first.notes.add(pitch = nt.pitch,start_time=nt.start_time, end_time = nt.end_time, velocity = nt.velocity)
-      sequences[0] = first
-      combined = sequences_lib.concatenate_sequences(sequences)
-      note_seq.note_sequence_to_midi_file(combined,filepath)
-      save_plot(filepath)
-      """
 
 def save_plot(filepath):
       """
