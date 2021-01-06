@@ -1,11 +1,12 @@
 from pydub import AudioSegment
 import os
-import beat_estimation
+import beat_analysis
 import crepe
 import csv
 import pitch_detection
 import note_seq
 from audio_to_midi_melodia import audio_to_midi_melodia
+import visual_midi
 
 def trim_wav(filepath, start_time=0, end_time=-1):
     newAudio = AudioSegment.from_wav(filepath) #data/twinkle.wav"
@@ -22,7 +23,7 @@ def trim_wav(filepath, start_time=0, end_time=-1):
     return title+'_trimmed.wav'
 
 
-def wav_to_midi(filepath, use_atmm=False, _smooth=0.25, _minduration=0.1):
+def wav_to_midi(filepath, use_atmm=False , _smooth=0.25, _minduration=0.1):
       """
       Converts Wav input file into Midi
       Option to use atmm, currently false by default
@@ -48,7 +49,7 @@ def wav_to_midi(filepath, use_atmm=False, _smooth=0.25, _minduration=0.1):
       seq_to_mid = note_seq.note_sequence_to_pretty_midi(seq)
 
       # Extract tempo and onset estimation from midi
-      estimated_tempo, estimated_start = beat_estimation.tempo_and_onset(seq_to_mid)
+      estimated_tempo, estimated_start = beat_analysis.tempo_and_onset(seq_to_mid)
 
       # Fix Onset to start of file, set tempo, and save as Midi File
       if use_atmm:
@@ -58,9 +59,11 @@ def wav_to_midi(filepath, use_atmm=False, _smooth=0.25, _minduration=0.1):
                               smooth=_smooth, minduration=_minduration)
       else:
             # When not using atmm, file will be re-named with '.mid'
-            beat_estimation.quantization_and_preparation(seq,estimated_tempo, estimated_start)
+            beat_analysis.quantization_and_preparation(seq,estimated_tempo, estimated_start)
             note_seq.note_sequence_to_midi_file(seq,filepath.split('.')[0] + '.mid')
 
 
 if __name__=="__main__":
-      wav_to_midi('data/twinkle.wav',use_atmm=False)
+  #wav_to_midi('data/twinkle.wav',use_atmm=False)
+  newAudio = AudioSegment.from_file(file='data/twinkle.wav',format="wav") #data/twinkle.wav"
+  
