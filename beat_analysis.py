@@ -118,9 +118,10 @@ def midi_to_sequence(filepath, beat_analysis = True):
     mid = pretty_midi.PrettyMIDI(filepath)
     seq = note_seq.midi_to_note_sequence(mid)
 
-    # get tempo and onset (midi format)
-    tempo, start_time = tempo_and_onset(mid)
     if beat_analysis:
+        # get tempo and onset (midi format)
+        tempo, start_time = tempo_and_onset(mid)
+
         # set tempo and move file to start @ onset (note sequence now)
         adjust_sequence_to_onset(seq,start_time)
         set_tempo(seq,tempo/2)
