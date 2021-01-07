@@ -37,7 +37,7 @@ def combine_note_sequence_as_midi(sequences,filepath):
             combined.instruments.append(inst)
       combined.write(filepath)
       save_plot(filepath)
-      print(str(len(sequences))+' sequences combined and saved as '+filepath)
+      #print(str(len(sequences))+' sequences combined and saved as '+filepath)
 
 
 def save_plot(filepath):
@@ -52,3 +52,22 @@ def save_plot(filepath):
       midi = pretty_midi.PrettyMIDI(filepath)
       plotter = visual_midi.Plotter()
       plotter.show(midi,folder+filepath.split('/')[-1].partition('.')[0]+'.html')
+
+
+def tempo_and_onset(midi_data, integer_tempo=True, steps_per_quarter=4):
+    """
+    Extracts tempo and onset(start time of first estimated beat) of the given midi data
+        using functionality provided by pretty_midi
+
+    Returns: tempo in qpm (float)
+             onset in start time (seconds) of first estimated beat
+    """
+    tempo = midi_data.estimate_tempo()
+    onset_beat = midi_data.estimate_beat_start()
+    steps_per_second = steps_per_quarter*tempo/60
+    onset_time = onset_beat/steps_per_second
+
+    if integer_tempo:
+        tempo = int(tempo)
+
+    return tempo, onset_time
