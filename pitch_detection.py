@@ -3,13 +3,13 @@ from math import log2, pow
 from note_seq.protobuf import music_pb2
 import crepe
 from scipy.io import wavfile
-import beat_estimation
+import beat_analysis
 import wav_utils
 import os.path
 import csv
-import beat_estimation
+import beat_analysis
 
-time_step = 0.05
+time_step = 0.01
 A4 = 440
 C0 = A4*pow(2, -4.75)
 
