@@ -1,3 +1,4 @@
+from numpy.core.shape_base import atleast_1d
 from pydub import AudioSegment
 import os
 from beat_analysis import tempo_and_onset
@@ -9,33 +10,42 @@ from audio_to_midi_melodia import audio_to_midi_melodia
 import visual_midi
 
 def trim_wav(filepath, start_time=0, end_time=-1):
-    newAudio = AudioSegment.from_wav(filepath) #data/twinkle.wav"
+      """
+      Cuts off the first part of the wav file
+      Input: start_time is the new start time
+      """
+      newAudio = AudioSegment.from_wav(filepath) #data/twinkle.wav"
 
-    t1 = start_time * 1000 #Works in milliseconds
-    if end_time==-1:
-        newAudio = newAudio[t1:]
-    else:
-        t2 = end_time * 1000
-        newAudio = newAudio[t1:t2]
-    title = filepath.split('.')[0]
-    newAudio.export(title+'_trimmed.wav', format="wav") #Exports to a wav file in the current path.
+      t1 = start_time * 1000 #Works in milliseconds
+      if end_time==-1:
+          newAudio = newAudio[t1:]
+      else:
+          t2 = end_time * 1000
+          newAudio = newAudio[t1:t2]
+      title = filepath.split('.')[0]
+      newAudio.export(title+'_trimmed.wav', format="wav") #Exports to a wav file in the current path.
 
-    return title+'_trimmed.wav'
+      return title+'_trimmed.wav'
 
 
-def wav_to_midi(filepath, use_atmm=False , _smooth=0.25, _minduration=0.1):
+def wav_to_midi(filepath, use_atmm=False , outfile = None, _smooth=0.25, _minduration=0.1):
       """
       Converts Wav input file into Midi
       Option to use atmm, currently false by default
-      if not using atmm, does it the original way using only crepe
+      if not using atmm, uses algorithm in pitch_detection
       """
-      csv_file = filepath.split('.')[0]+'.f0.csv'
-      print(csv_file, filepath)
+      
+      if outfile is not None:
+            midi_filepath = outfile
+      else:
+            midi_filepath = filepath.split('.')[0] + '.mid'
 
       # Use crepe to extract frequency and confidence for each time step
+      csv_file = filepath.split('.')[0]+'.f0.csv'
       if not os.path.isfile(csv_file):
         crepe.process_file(filepath)
 
+      # Read f0.csv file
       frequency = []
       confidence = []
       with open(csv_file,newline='') as csvfile:
@@ -45,27 +55,25 @@ def wav_to_midi(filepath, use_atmm=False , _smooth=0.25, _minduration=0.1):
           confidence.append(float(row['confidence']))
 
       # Convert into NoteSequence and do basic trimming
-      seq = pitch_detection.crepe_to_note_sequenece(frequency, confidence)
-      print(seq)
-      seq_to_mid = note_seq.note_sequence_to_pretty_midi(seq)
-
-      # Extract tempo and onset estimation from midi
-      estimated_tempo, estimated_start = tempo_and_onset(seq_to_mid)
-
-      # Fix Onset to start of file, set tempo, and save as Midi File
+      seq = pitch_detection.crepe_to_note_sequenece(frequency, confidence, trills=True)
+     
       if use_atmm:
-            # When using atmm, file will be re-named with '_trimmed.mid'
-            newFile = trim_wav(filepath,estimated_start)
-            audio_to_midi_melodia.audio_to_midi_melodia(newFile, newFile.split('.')[0] + '.mid', estimated_tempo,
+            # Extract tempo from midi - needed as an argument for atmm
+            seq_to_mid = note_seq.note_sequence_to_pretty_midi(seq)
+            estimated_tempo, estimated_start = tempo_and_onset(seq_to_mid)
+
+            # use atmm to convert wav into midi
+            audio_to_midi_melodia.audio_to_midi_melodia(filepath, midi_filepath, estimated_tempo,
                               smooth=_smooth, minduration=_minduration)
       else:
-            # When not using atmm, file will be re-named with '.mid'
-            #beat_analysis.quantization_and_preparation(seq,estimated_tempo, estimated_start)
-            note_seq.note_sequence_to_midi_file(seq,filepath.split('.')[0] + '.mid')
+            # When not using atmm, algorithm in pitch_detection will be used as default
+            note_seq.note_sequence_to_midi_file(seq,midi_filepath)
+
+      print(midi_filepath+' saved from '+filepath)
 
 
 if __name__=="__main__":
-  #wav_to_midi('data/twinkle.wav',use_atmm=False)
-  #newAudio = AudioSegment.from_file(file='data/twinkle.wav',format="wav") #data/twinkle.wav"
-  wav_to_midi('data/wav/PianoMan.wav')
-  
+      # wav 파일 녹음 한거 경로 넣어주면 같은 폴더에 [제목].mid 이름으로 미디로 변환해줌
+      # 인자로 atmm == True 하면 atmm 으로 해주고 False 면 직접 짠 pitch_detection 함수들 써서 미디로 바꿔줌
+      wav_to_midi('data/wav/twinkle.wav', outfile= 'data/wav/twinkle_atmm.mid',use_atmm = True)
+      wav_to_midi('data/wav/twinkle.wav', outfile= 'data/wav/twinkle_noatmm.mid',use_atmm = False)
