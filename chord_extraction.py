@@ -10,7 +10,7 @@ import os
 
 from beat_analysis import midi_to_sequence, convert_beat_annotation_to_note_sequence
 from utils import combine_note_sequence_as_midi
-
+from wav_utils import wav_to_midi
 
 def convert_chords_annotation_to_note_sequence(sequence, maj_min=True, triads=True, inversion=False):
     """
@@ -60,7 +60,7 @@ def convert_chords_annotation_to_note_sequence(sequence, maj_min=True, triads=Tr
     return seq
 
 
-def extract_chords_from_note_sequence(sequence, major_minor=True, triads=True, inversion=False, _chords_per_bar=1):
+def extract_chords_from_note_sequence(sequence, maj_min=True, triads=True, inversion=False, _chords_per_bar=1):
     """
     Extracts chords from note sequence
 
@@ -73,12 +73,10 @@ def extract_chords_from_note_sequence(sequence, major_minor=True, triads=True, i
         sequence = quantize_note_sequence(sequence, 4)
 
     try:
-        chord_inference.infer_chords_for_sequence(
-            sequence, chords_per_bar=_chords_per_bar)
-    except chord_inference.SequenceAlreadyHasChordsError:
-        nothing = 1
-
-    chords = convert_chords_annotation_to_note_sequence(sequence)
+        chord_inference.infer_chords_for_sequence(sequence, chords_per_bar=_chords_per_bar)
+    except:
+        nothing=1
+    chords = convert_chords_annotation_to_note_sequence(sequence,maj_min,triads,inversion)
     return chords
 
 
@@ -105,12 +103,20 @@ def extract_roots_as_note_seq(sequence, _chords_per_bar=1):
 
 
 if __name__ == "__main__":
-    folder = 'data/midi/'
-    files = ['PianoMan.mid']
-    for file in files:
-        filepath = folder+file
-        seq = midi_to_sequence(filepath)
+    
+    # 미디 파일로 해본거
+    # PianoMan.mid 로 해봄
+
+    # wav 파일로 해본거
+    wavfile = 'data/wav/twinkle.wav'
+    #wav_to_midi(wavfile, use_atmm = True, outfile= 'data/wav/twinkle_smooth0.15.mid',_smooth=0.15)
+    
+    files = ['data/midi/PianoMan.mid','data/wav/twinkle_smooth0.15.mid']
+    for filepath in files:
+        seq = note_seq.midi_file_to_note_sequence(filepath)
+
+        # seq = midi_to_sequence(filepath)
         chords = extract_chords_from_note_sequence(seq)
 
-        midpath = 'results/mid/chords_and_melody.mid'
-        combine_note_sequence_as_midi([seq, chords], midpath)
+        outfile = filepath.split('.')[0]+'_chords_and_melody.mid'
+        combine_note_sequence_as_midi([seq, chords], outfile)

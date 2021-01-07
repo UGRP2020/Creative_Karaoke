@@ -1,7 +1,7 @@
 from numpy.core.shape_base import atleast_1d
 from pydub import AudioSegment
 import os
-from beat_analysis import tempo_and_onset
+from utils import tempo_and_onset
 import crepe
 import csv
 import pitch_detection
@@ -41,9 +41,9 @@ def wav_to_midi(filepath, use_atmm=False , outfile = None, _smooth=0.25, _mindur
             midi_filepath = filepath.split('.')[0] + '.mid'
 
       # Use crepe to extract frequency and confidence for each time step
-      csv_file = filepath.split('.')[0]+'.f0.csv'
+      csv_file = 'results/crepe/'+filepath.split('/')[-1].split('.')[0]+'.f0.csv'
       if not os.path.isfile(csv_file):
-        crepe.process_file(filepath)
+        crepe.process_file(filepath,output='results/crepe')
 
       # Read f0.csv file
       frequency = []
@@ -75,5 +75,10 @@ def wav_to_midi(filepath, use_atmm=False , outfile = None, _smooth=0.25, _mindur
 if __name__=="__main__":
       # wav 파일 녹음 한거 경로 넣어주면 같은 폴더에 [제목].mid 이름으로 미디로 변환해줌
       # 인자로 atmm == True 하면 atmm 으로 해주고 False 면 직접 짠 pitch_detection 함수들 써서 미디로 바꿔줌
-      wav_to_midi('data/wav/twinkle.wav', outfile= 'data/wav/twinkle_atmm.mid',use_atmm = True)
-      wav_to_midi('data/wav/twinkle.wav', outfile= 'data/wav/twinkle_noatmm.mid',use_atmm = False)
+      files = ['data/wav/twinkle.wav','data/wav/Letitbe.wav', 'data/wav/Hometown.wav']
+      for wavfile in files:
+            title = wavfile.split('/')[-1].split('.')[0]
+            wav_to_midi(wavfile, outfile= 'results/test_pitch_detection/'+title+'_atmm.mid', use_atmm=True)
+            wav_to_midi(wavfile, outfile= 'results/test_pitch_detection/'+title+'_no_atmm.mid', use_atmm=False)
+
+            print('Converted wav file '+title+' into midi in results/test_pitch_detection')
