@@ -1,6 +1,6 @@
 # Creative Karaoke
 import note_seq
-
+import os
 from melody_generator import melody_generator
 from base_generator import base_generator
 from drum_generator import drum_generator
@@ -12,10 +12,11 @@ from utils import combined_sequence_to_midi_with_instruments, midi_to_wav, seq_t
 # input 멜로디(wav)의 path 받아서 처리
 def creative_karaoke(filepath, tempo=60, inst=[53, 0, 36, 118]):
     # constants
+    title = filepath.split('/')[-1].split('.')[0]
     total_num_steps = 256
     outfilepath = './results/user_midi.mid'
 
-    wav_to_midi_with_tempo(filepath, tempo, False, outfilepath) # atmm 사용 여부 선택 가능, 선택 하는 것으로 일단 작성
+    wav_to_midi_with_tempo(filepath, tempo, True, outfilepath) # atmm 사용 여부 선택 가능, 선택 하는 것으로 일단 작성
     user_sequence = note_seq.midi_file_to_note_sequence(outfilepath)
     user_sequence.tempos[0].qpm = tempo
 
@@ -44,11 +45,15 @@ def creative_karaoke(filepath, tempo=60, inst=[53, 0, 36, 118]):
 
 # 각각 미디를 파일로 출력
     str_name_dict = {0: 'main_melody', 1: 'chords', 2: 'base', 3: 'drum'}
-    combined_sequence_to_midi_with_instruments(results_seq, inst, './results/mid/fixed_tempo_result_combined_midi.mid')
+    combined_sequence_to_midi_with_instruments(results_seq, inst, './results/fixed/'+title+'_combined.mid')
 
     for i in range(len(results_seq)):
         midi = seq_to_midi_with_program(results_seq[i], inst[i])
-        midi_to_wav(midi, './results/wav/%s.wav' % str_name_dict[i])
+        midi_to_wav(midi, './results/fixed/'+title+'_%s.wav' % str_name_dict[i])
 
 if __name__== "__main__":
-    creative_karaoke('./data/wav/user_input.wav', 120)
+    folder = 'data/wav/'
+    for file in os.listdir(folder):
+        title = file.split('.')[0]
+        bpm = int(file.split('_')[1].split('.')[0])
+        creative_karaoke(folder+file,bpm)
