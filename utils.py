@@ -71,3 +71,18 @@ def tempo_and_onset(midi_data, integer_tempo=True, steps_per_quarter=4):
         tempo = int(tempo)
 
     return tempo, onset_time
+
+# NOTE: Changed to Fixed Tempo version
+def get_onset(midi_data, tempo, steps_per_quarter=4):
+    """
+    Extracts tempo and onset(start time of first estimated beat) of the given midi data
+        using functionality provided by pretty_midi
+
+    Returns: tempo in qpm (float)
+             onset in start time (seconds) of first estimated beat
+    """
+    onset_beat = midi_data.estimate_beat_start()
+    steps_per_second = steps_per_quarter*tempo/60
+    onset_time = onset_beat/steps_per_second
+
+    return onset_time
