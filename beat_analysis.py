@@ -1,5 +1,4 @@
 from note_seq.protobuf import music_pb2
-from note_seq import sequences_lib
 import note_seq
 import pretty_midi
 import utils
@@ -86,6 +85,27 @@ def wav_to_beat_annotated_sequence(filename):
     # Convert Wav to Midi file to convert to note sequence
     tmp_mid_file = filename.split('.')[0]+'_tmp.mid'
     wav_to_midi(filename,use_atmm=True,outfile=tmp_mid_file)
+
+    seq = note_seq.midi_file_to_note_sequence(tmp_mid_file)
+
+    # Beat Extraction using AUBIO library
+    # note that input file may be actual voice recording instead of a midi-converted-wav file
+    beats = get_beats(filename)
+    add_beat_annotations(seq,beats)
+    
+    # Delete temporary mid file
+    os.remove(tmp_mid_file)
+
+    return seq
+
+def wav_to_beat_annotated_sequence(filename, use_atmm = False):
+    if not filename.endswith('.wav'):
+        print('file must be wav file')
+        return None
+
+    # Convert Wav to Midi file to convert to note sequence
+    tmp_mid_file = filename.split('.')[0]+'_tmp.mid'
+    wav_to_midi(filename,use_atmm=use_atmm,outfile=tmp_mid_file)
 
     seq = note_seq.midi_file_to_note_sequence(tmp_mid_file)
 
