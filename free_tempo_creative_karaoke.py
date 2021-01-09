@@ -1,11 +1,12 @@
 from chord_extraction import extract_chords_and_roots_from_note_sequence
 from beat_analysis import wav_to_beat_annotated_sequence, midi_to_beat_annotated_sequence
-from utils import combine_note_sequence_as_midi, transpose_note_sequence
+from utils import combine_note_sequence_as_midi, transpose_note_sequence, seq_to_midi_with_program, midi_to_wav, combined_sequence_to_midi_with_instruments
 from melody_generator import melody_generator
-from note_seq.sequences_lib import quantize_note_sequence
+from note_seq.sequences_lib import quantize_note_sequence, trim_note_sequence
 import note_seq
 from note_seq.protobuf import music_pb2
-from fixed_tempo_drum_generator import drum_generator
+from drum_generator import drum_generator, drum_primer
+import librosa
 
 def creative_karaoke(filepath):
     # input files
@@ -30,7 +31,7 @@ def creative_karaoke(filepath):
         results_seq.append(chords)
 
         # generate additional melody
-        #main_melody = melody_generator(user_sequence,)
+        # main_melody = melody_generator(user_sequence,)
         
         # generate bassline using roots
         quantized_roots = quantize_note_sequence(roots, steps_per_quarter = 4)
@@ -40,16 +41,25 @@ def creative_karaoke(filepath):
         transpose_note_sequence(bass, -2)
         
         # drums
-        drum_primer = [()]*(quantized_roots.total_quantized_steps+grace_steps)
+        """drum_primer = [()]*(quantized_roots.total_quantized_steps+grace_steps)
         for nt in quantized_roots.notes:
             drum_primer[nt.quantized_start_step] = (40,)
-        print(str(drum_primer))
-        drums = drum_generator(str(drum_primer), temperature= 3.0, num_steps = quantized_roots.total_quantized_steps+grace_steps)
+        print(str(drum_primer))"""
         
+        primer = drum_primer(quantized_roots)
+        drums = drum_generator(primer, temperature = 2.0, num_steps = quantized_roots.total_quantized_steps*2)
+        drums = trim_note_sequence(drums, bass.total_time,drums.total_time)
+        for nt in drums.notes:
+            nt.start_time -= bass.total_time
+            nt.end_time -= bass.total_time
+
         result_folder = 'results/test_free_tempo/'
-        combine_note_sequence_as_midi([drums],result_folder+title+'drums.mid')
-        #combine_note_sequence_as_midi([roots],'not_quantized.mid')
-        #combined = combine_note_sequence_as_midi(results_seq,result_folder+title+'.mid')
+        results_seq = [user_sequence, chords, bass, drums]
+        #combine_note_sequence_as_midi(results_seq,result_folder+title+'_combined.wav')
+
+        inst = [53, 0, 36, 118]# set program number
+
+        combined_sequence_to_midi_with_instruments(results_seq,inst,result_folder+title+'_combined.mid')
 
 if __name__=="__main__":
     creative_karaoke('')

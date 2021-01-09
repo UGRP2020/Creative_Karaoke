@@ -13,6 +13,27 @@ def play_and_plot(_seq):
   note_seq.plot_sequence(_seq)
   note_seq.play_sequence(_seq,synth=note_seq.fluidsynth)
 
+def combined_sequence_to_midi_with_instruments(sequences, insts, outfile=None):
+      midi = pretty_midi.PrettyMIDI()
+      if len(sequences)!=len(insts):
+            print('invalid')
+            return None
+
+      for i in range(len(sequences)):
+            inst = pretty_midi.Instrument(program = insts[i])
+            for nt in sequences[i].notes:
+                  note = pretty_midi.Note(velocity = nt.velocity, pitch = nt.pitch, start = nt.start_time, end = nt.end_time)
+                  inst.notes.append(note)
+            midi.instruments.append(inst)
+      
+      if outfile is not None:
+            if outfile.endswith('wav'):
+                  midi_to_wav(midi,outfile)
+            elif outfile.endswith('mid'):
+                  midi.write(outfile)
+
+      return midi
+
 def seq_to_midi_with_program(sequence, program_number):
       midi_with_program = pretty_midi.PrettyMIDI()
       inst = pretty_midi.Instrument(program=program_number)
