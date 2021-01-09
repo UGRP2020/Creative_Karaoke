@@ -3,6 +3,8 @@ from note_seq import sequences_lib
 from note_seq.protobuf import music_pb2
 import pretty_midi
 import visual_midi
+from midi2audio import FluidSynth
+import os
 
 def play_and_plot(_seq):
   """
@@ -10,6 +12,22 @@ def play_and_plot(_seq):
   """
   note_seq.plot_sequence(_seq)
   note_seq.play_sequence(_seq,synth=note_seq.fluidsynth)
+
+def seq_to_midi_with_program(sequence, program_number):
+      midi_with_program = pretty_midi.PrettyMIDI()
+      inst = pretty_midi.Instrument(program=program_number)
+      for nt in sequence.notes:
+            note = pretty_midi.Note(velocity = nt.velocity,pitch = nt.pitch,start = nt.start_time, end = nt.end_time)
+            inst.notes.append(note)
+      midi_with_program.instruments.append(inst)
+
+      return midi_with_program
+
+def midi_to_wav(midi_data, filepath):
+      tmp_midi_file = 'temp.mid'
+      midi_data.write(tmp_midi_file)
+      FluidSynth().midi_to_audio(tmp_midi_file,filepath)
+      os.remove(tmp_midi_file)
 
 
 def combine_note_sequence_as_midi(sequences,filepath):
