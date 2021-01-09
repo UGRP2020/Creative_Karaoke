@@ -43,7 +43,7 @@ def creative_karaoke(filepath, tempo=60, inst=[53, 0, 36, 118]):
     results_seq.append(drum)
 
 # 각각 미디를 파일로 출력
-    #inst = [53, 0, 36, 118]# set program number
+    inst = [53, 0, 36, 118]# set program number
     str_name_dict = {0: 'main_melody', 1: 'chords', 2: 'base', 3: 'drum'}
     combine_note_sequence_as_midi(results_seq, './results/mid/fixed_tempo_result_combined_midi.mid')
 

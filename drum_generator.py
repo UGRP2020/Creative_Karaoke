@@ -9,6 +9,10 @@ from note_seq.protobuf import generator_pb2
 from note_seq.protobuf import music_pb2
 import tensorflow.compat.v1 as tf
 
+HIGH_TOM = 50
+BASS_DRUM = 36
+ACOUSTIC_SNARE = 38
+HIGH_HAT = 42
 
 def drum_generator(primer, is_primer_seq=True, num_steps=256, temperature=1.0, qpm=120):
     bundle = sequence_generator_bundle.read_bundle_file('./bundle/drum_kit_rnn.mag')
@@ -60,6 +64,22 @@ def drum_generator(primer, is_primer_seq=True, num_steps=256, temperature=1.0, q
 
     return drum
 
+def drum_primer(beats):
+    grace_steps = 3
+    drum_primer = [()]*(beats.total_quantized_steps+grace_steps)
+
+    count=0
+    for nt in beats.notes:
+        if count==0:
+            drum_primer[nt.quantized_start_step] = (BASS_DRUM, ACOUSTIC_SNARE, HIGH_HAT,)
+        elif count==2:
+            drum_primer[nt.quantized_start_step] = (ACOUSTIC_SNARE, HIGH_HAT,)
+        else:
+            drum_primer[nt.quantized_start_step] = (HIGH_HAT,)
+        count = (count+1)%4
+    
+    return str(drum_primer)
+    
 if __name__ == "__main__":
     drum = drum_generator("[(36,)]")
     note_seq.sequence_proto_to_midi_file(drum, 'test_drum_generator.mid')
