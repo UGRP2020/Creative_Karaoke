@@ -19,7 +19,6 @@ def combine_note_sequence_as_midi(sequences,filepath):
       Arguments: sequences is a list of note sequences
                 filepath is name of path you wish to store midi file
       """
-
       default_program = 0
       combined = pretty_midi.PrettyMIDI()
       for seq in sequences:
@@ -86,3 +85,14 @@ def get_onset(midi_data, tempo, steps_per_quarter=4):
     onset_time = onset_beat/steps_per_second
 
     return onset_time
+    
+def transpose_note_sequence(sequence, octave):
+      """Transposes all notes in sequence by input octave"
+      Input: octave in integers ex. 1, -1 etc.
+      """
+      transpose_pitch = octave*12
+      for nt in sequence.notes:
+            nt.pitch += transpose_pitch
+
+      
+
