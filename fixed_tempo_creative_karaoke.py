@@ -6,7 +6,7 @@ from base_generator import base_generator
 from drum_generator import drum_generator
 from chord_extraction import extract_roots_as_note_seq, extract_chords_from_note_sequence
 from wav_utils import wav_to_midi_with_tempo
-from utils import combine_note_sequence_as_midi, midi_to_wav, seq_to_midi_with_program
+from utils import combined_sequence_to_midi_with_instruments, midi_to_wav, seq_to_midi_with_program
 # from beat_analysis import 
 
 # input 멜로디(wav)의 path 받아서 처리
@@ -43,9 +43,8 @@ def creative_karaoke(filepath, tempo=60, inst=[53, 0, 36, 118]):
     results_seq.append(drum)
 
 # 각각 미디를 파일로 출력
-    #inst = [53, 0, 36, 118]# set program number
     str_name_dict = {0: 'main_melody', 1: 'chords', 2: 'base', 3: 'drum'}
-    combine_note_sequence_as_midi(results_seq, './results/mid/fixed_tempo_result_combined_midi.mid')
+    combined_sequence_to_midi_with_instruments(results_seq, inst, './results/mid/fixed_tempo_result_combined_midi.mid')
 
     for i in range(len(results_seq)):
         midi = seq_to_midi_with_program(results_seq[i], inst[i])
