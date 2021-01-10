@@ -14,7 +14,7 @@ BASS_DRUM = 36
 ACOUSTIC_SNARE = 38
 HIGH_HAT = 42
 
-def drum_generator(primer, is_primer_seq=True, num_steps=256, temperature=1.0, qpm=120):
+def drum_generator(primer, is_primer_seq=True, num_steps=256, temperature=0.5, qpm=120):
     bundle = sequence_generator_bundle.read_bundle_file('./bundle/drum_kit_rnn.mag')
     config_id = bundle.generator_details.id
     config = drums_rnn_model.default_configs[config_id]
