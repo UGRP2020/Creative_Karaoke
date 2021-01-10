@@ -121,10 +121,7 @@ def extract_chords_and_roots_from_note_sequence(sequence, maj_min=True, triads=T
         steps_per_quarter = 4
         sequence = quantize_note_sequence(sequence, 4)
     """
-
-    print(is_quantized_sequence(sequence))
-    
-    chord_inference.infer_chords_for_sequence(sequence)
+    chord_inference.infer_chords_for_sequence(sequence, chords_per_bar = _chords_per_bar)
     
     chords = convert_chords_annotation_to_note_sequence(sequence,maj_min,triads,inversion)
     roots = convert_chords_annotation_to_note_sequence(sequence, roots=True)
@@ -144,9 +141,7 @@ def extract_chords_from_note_sequence(sequence, maj_min=True, triads=True, inver
         sequence = quantize_note_sequence(sequence, 4)
     """
 
-    print(is_quantized_sequence(sequence))
-    
-    chord_inference.infer_chords_for_sequence(sequence)
+    chord_inference.infer_chords_for_sequence(sequence,chords_per_bar = _chords_per_bar)
     
     chords = convert_chords_annotation_to_note_sequence(sequence,maj_min,triads,inversion)
     return chords
