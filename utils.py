@@ -13,16 +13,16 @@ def play_and_plot(_seq):
   note_seq.plot_sequence(_seq)
   note_seq.play_sequence(_seq,synth=note_seq.fluidsynth)
 
-def combined_sequence_to_midi_with_instruments(sequences, insts, outfile=None):
+def combined_sequence_to_midi_with_instruments(sequences, insts, velocity, outfile=None):
       midi = pretty_midi.PrettyMIDI()
       if len(sequences)!=len(insts):
             print('invalid')
             return None
 
       for i in range(len(sequences)):
-            inst = pretty_midi.Instrument(program = insts[i])
+            inst = pretty_midi.Instrument(program = insts[i], is_drum=(i == 3))
             for nt in sequences[i].notes:
-                  note = pretty_midi.Note(velocity = nt.velocity, pitch = nt.pitch, start = nt.start_time, end = nt.end_time)
+                  note = pretty_midi.Note(velocity = velocity[i], pitch = nt.pitch, start = nt.start_time, end = nt.end_time)
                   inst.notes.append(note)
             midi.instruments.append(inst)
       
@@ -34,11 +34,11 @@ def combined_sequence_to_midi_with_instruments(sequences, insts, outfile=None):
 
       return midi
 
-def seq_to_midi_with_program(sequence, program_number):
+def seq_to_midi_with_program(sequence, program_number, velocity, is_drum = False):
       midi_with_program = pretty_midi.PrettyMIDI()
-      inst = pretty_midi.Instrument(program=program_number)
+      inst = pretty_midi.Instrument(program=program_number,is_drum=is_drum)
       for nt in sequence.notes:
-            note = pretty_midi.Note(velocity = nt.velocity,pitch = nt.pitch,start = nt.start_time, end = nt.end_time)
+            note = pretty_midi.Note(velocity = velocity,pitch = nt.pitch,start = nt.start_time, end = nt.end_time)
             inst.notes.append(note)
       midi_with_program.instruments.append(inst)
 
@@ -67,7 +67,7 @@ def combine_note_sequence_as_midi(sequences,filepath):
             else:
                   program_number = default_program
 
-            inst = pretty_midi.Instrument(program=program_number)
+            inst = pretty_midi.Instrument(program=program_number, is_drum=(sequences.index(seq) == 3))
             for nt in seq.notes:
                   note = pretty_midi.Note(velocity = nt.velocity,pitch = nt.pitch,start = nt.start_time, end = nt.end_time)
                   inst.notes.append(note)

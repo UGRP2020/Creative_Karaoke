@@ -123,7 +123,8 @@ if __name__=="__main__":
       # wav 파일 녹음 한거 경로 넣어주면 같은 폴더에 [제목].mid 이름으로 미디로 변환해줌
       # 인자로 atmm == True 하면 atmm 으로 해주고 False 면 직접 짠 pitch_detection 함수들 써서 미디로 바꿔줌
       files = ['data/wav/twinkle.wav','data/wav/Letitbe.wav', 'data/wav/Hometown.wav']
-      for wavfile in files:
+      for file in os.listdir('data/wav/'): #files:
+            wavfile = 'data/wav/'+file
             title = wavfile.split('/')[-1].split('.')[0]
             wav_to_midi(wavfile, outfile= 'results/test_pitch_detection/'+title+'_atmm.mid', use_atmm=True)
             wav_to_midi(wavfile, outfile= 'results/test_pitch_detection/'+title+'_no_atmm.mid', use_atmm=False)
