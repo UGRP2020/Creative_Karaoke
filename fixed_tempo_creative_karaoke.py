@@ -16,11 +16,14 @@ GENRE_JAZZ = 0
 GENRE_RNB = 1
 GENRE_CLASSICAL = 2
 GENRE_ROCK = 3
-genre_inst = {GENRE_JAZZ:[53,0,36,40],GENRE_RNB:[53,0,36,40],GENRE_CLASSICAL:[53,0,36,40], GENRE_ROCK:[53,0,36,40]}
-genre_drum = {GENRE_JAZZ:"120 Bossa Hihat.mid",GENRE_RNB:"",GENRE_CLASSICAL:"", GENRE_ROCK:""}
+genre_inst = {GENRE_JAZZ:[65,0,36,40],GENRE_RNB:[100,53,35,40],GENRE_CLASSICAL:[0,48,43,61], GENRE_ROCK:[29,18,34,0]}
+genre_drum = {GENRE_JAZZ:"120 Bossa Hihat.mid",GENRE_RNB:"160 New Orleans Feel Ride 001 (16).mid",GENRE_CLASSICAL:"120 Bossa Hihat.mid", GENRE_ROCK:"70 Ridebell sync groove.mid"}
 genre_str = {GENRE_JAZZ:"Jazz",GENRE_RNB:"RnB",GENRE_CLASSICAL:"Classical", GENRE_ROCK:"Rock"}
 
-def creative_karaoke(filepath, tempo=60, velocity = [90,50,50,50], genre = GENRE_JAZZ):
+def creative_karaoke(filepath, tempo=60, genre = GENRE_JAZZ, velocity = [90,50,50,50]):
+    if genre is GENRE_CLASSICAL:
+        velocity = [90,50,50,90]
+
     # constants
     total_num_steps = 256
     outfilepath = './results/user_midi.mid'
@@ -48,37 +51,41 @@ def creative_karaoke(filepath, tempo=60, velocity = [90,50,50,50], genre = GENRE
     results_seq.append(bass)
 
 # 드럼
-    """
-    for file in os.listdir('data/drum_rhythm/'):
-        drum = drum_generator('data/drum_rhythm/'+file, is_primer_seq=False, num_steps = total_num_steps, temperature=1.0, qpm = user_sequence.tempos[0].qpm)
-        break
-    """   
-    drumpath = 'data/drum_rhythm/' + genre_drum[genre]
-    name = genre_drum[genre].split('.')[0]
-    tempo = int(name.split(' ')[0])
-    factor = user_sequence.tempos[0].qpm / tempo
-    print('tempo is %s, factor is %s' % (tempo, factor))
+    if genre is not GENRE_CLASSICAL:
+        """
+        for file in os.listdir('data/drum_rhythm/'):
+            drum = drum_generator('data/drum_rhythm/'+file, is_primer_seq=False, num_steps = total_num_steps, temperature=1.0, qpm = user_sequence.tempos[0].qpm)
+            break
+        """   
+        drumpath = 'data/drum_rhythm/' + genre_drum[genre]
+        name = genre_drum[genre].split('.')[0]
+        tempo = int(name.split(' ')[0])
+        factor = user_sequence.tempos[0].qpm / tempo
+        print('tempo is %s, factor is %s' % (tempo, factor))
 
-    drum_seq = note_seq.midi_file_to_note_sequence(drumpath)
-    stretched_seq = stretch_note_sequence(drum_seq,factor)
-    temp_file = 'tmp_stretched_drum.mid'
-    note_seq.note_sequence_to_midi_file(stretched_seq, temp_file)
+        drum_seq = note_seq.midi_file_to_note_sequence(drumpath)
+        stretched_seq = stretch_note_sequence(drum_seq,factor)
+        temp_file = 'tmp_stretched_drum.mid'
+        note_seq.note_sequence_to_midi_file(stretched_seq, temp_file)
 
-    drum = drum_generator(temp_file, is_primer_seq=False, num_steps = total_num_steps, temperature=1.0, qpm = user_sequence.tempos[0].qpm)
-    os.remove(temp_file)
-    results_seq.append(drum)
+        drum = drum_generator(temp_file, is_primer_seq=False, num_steps = total_num_steps, temperature=1.0, qpm = user_sequence.tempos[0].qpm)
+        os.remove(temp_file)
+        results_seq.append(drum)
+    else: results_seq.append(roots)
 
 # 각각 미디를 파일로 출력
     str_name_dict = {0: 'main_melody', 1: 'chords', 2: 'base', 3: 'drum'}
     combined_sequence_to_midi_with_instruments(results_seq, inst, velocity,'./results/fixed/%s_%s.mid'% (genre_str[genre], title))
 
     for i in range(len(results_seq)):
-        midi = seq_to_midi_with_program(results_seq[i], inst[i],velocity[i],is_drum = (i==3))
+        midi = seq_to_midi_with_program(results_seq[i], inst[i],velocity[i],is_drum = (genre != GENRE_CLASSICAL and i==3))
         midi_to_wav(midi, './results/fixed/%s_%s_%s.wav' % (title, genre_str[genre], str_name_dict[i]))
 
 if __name__== "__main__":
-    folder = 'data/wav/'
+    genre = GENRE_CLASSICAL
+    tempo = genre_drum[genre].split(" ")[0]
+    folder = 'data/wav/%s/' % tempo
     for file in os.listdir(folder):
         title = file.split('.')[0]
-        bpm = int(file.split('_')[1].split('.')[0])
-        creative_karaoke(folder+file,bpm)
+        # bpm = int(file.split('_')[1].split('.')[0])
+        creative_karaoke(folder+file, int(tempo), genre)
