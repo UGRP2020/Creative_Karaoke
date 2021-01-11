@@ -85,12 +85,13 @@ def wav_to_midi_with_tempo(filepath, tempo, use_atmm=False, outfile = None, _smo
             midi_filepath = outfile
       else:
             midi_filepath = filepath.split('.')[0] + '.mid'
-
+      '''
       # Use crepe to extract frequency and confidence for each time step
       csv_file = 'results/crepe/'+filepath.split('/')[-1].split('.')[0]+'.f0.csv'
       if not os.path.isfile(csv_file):
         crepe.process_file(filepath,output='results/crepe')
-
+      '''
+      crepe.process_file(filepath,output='results/crepe')
       # Read f0.csv file
       frequency = []
       confidence = []
