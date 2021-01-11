@@ -5,6 +5,7 @@ import pretty_midi
 import visual_midi
 from midi2audio import FluidSynth
 import os
+from constant import *
 
 def play_and_plot(_seq):
   """
@@ -13,14 +14,14 @@ def play_and_plot(_seq):
   note_seq.plot_sequence(_seq)
   note_seq.play_sequence(_seq,synth=note_seq.fluidsynth)
 
-def combined_sequence_to_midi_with_instruments(sequences, insts, velocity, outfile=None):
+def combined_sequence_to_midi_with_instruments(sequences, insts, velocity, outfile=None, genre=GENRE_JAZZ):
       midi = pretty_midi.PrettyMIDI()
       if len(sequences)!=len(insts):
             print('invalid')
             return None
 
       for i in range(len(sequences)):
-            inst = pretty_midi.Instrument(program = insts[i], is_drum=(i == 3))
+            inst = pretty_midi.Instrument(program = insts[i], is_drum=(genre != GENRE_CLASSICAL and i == 3))
             for nt in sequences[i].notes:
                   note = pretty_midi.Note(velocity = velocity[i], pitch = nt.pitch, start = nt.start_time, end = nt.end_time)
                   inst.notes.append(note)
