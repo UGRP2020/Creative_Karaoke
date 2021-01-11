@@ -71,7 +71,7 @@ def creative_karaoke(filepath, tempo=60, genre = GENRE_JAZZ, velocity = [80,50,9
 
     for i in range(len(results_seq)):
         midi = seq_to_midi_with_program(results_seq[i], inst[i],velocity[i],is_drum = (genre != GENRE_CLASSICAL and i==3))
-        midi_to_wav(midi, './results/fixed/%s_%s.wav' % (title, str_name_dict[i]))
+        midi_to_wav(midi, './results/fixed/%s_%s.wav' % (title, str_name_dict[i]), i)
 
 if __name__== "__main__":
     genre = GENRE_JAZZ

@@ -45,11 +45,11 @@ def seq_to_midi_with_program(sequence, program_number, velocity, is_drum = False
 
       return midi_with_program
 
-def midi_to_wav(midi_data, filepath):
-      tmp_midi_file = 'temp.mid'
+def midi_to_wav(midi_data, filepath, i):
+      tmp_midi_file = 'temp%s.mid' % str(i) 
       midi_data.write(tmp_midi_file)
       FluidSynth().midi_to_audio(tmp_midi_file,filepath)
-      os.remove(tmp_midi_file)
+      # os.remove(tmp_midi_file)
 
 
 def combine_note_sequence_as_midi(sequences,filepath):
