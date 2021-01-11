@@ -12,9 +12,6 @@ from constant import *
 
 # input 멜로디(wav)의 path 받아서 처리
 # melody, chords, bass, drums [100,53,35,40] 18
-genre_inst = {GENRE_JAZZ:[65,0,36,40],GENRE_DISCO:[54,53,36,40],GENRE_CLASSICAL:[40,48,43,61], GENRE_ROCK:[29,5,34,0]}
-genre_drum = {GENRE_JAZZ:"120 Bossa Hihat.mid",GENRE_DISCO:"130 DISCOA.mid",GENRE_CLASSICAL:"120 Bossa Hihat.mid", GENRE_ROCK:"70 Ridebell sync groove.mid"}
-genre_str = {GENRE_JAZZ:"Jazz",GENRE_DISCO:"Disco",GENRE_CLASSICAL:"Classical", GENRE_ROCK:"Rock"}
 
 def creative_karaoke(filepath, tempo=60, genre = GENRE_JAZZ, velocity = [80,50,90,90]):
     # constants
@@ -82,5 +79,4 @@ if __name__== "__main__":
     folder = 'data/wav/%s/' % tempo
     for file in os.listdir(folder):
         title = file.split('.')[0]
-        # bpm = int(file.split('_')[1].split('.')[0])
         creative_karaoke(folder+file, int(tempo), genre)

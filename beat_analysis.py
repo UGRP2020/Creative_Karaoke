@@ -7,8 +7,6 @@ from aubio import tempo, source
 import os
 from wav_utils import wav_to_midi
 
-
-
 def convert_beat_annotation_to_note_sequence(sequence, beat_pitch = None):
     """
     Converts text annotations (of type BEAT) within note sequence into a separate note sequence
@@ -77,16 +75,19 @@ def add_beat_annotations(sequence, beats):
         ta.annotation_type = music_pb2.NoteSequence.TextAnnotation.BEAT
         ta.time = float(beat)
 
-def wav_to_beat_annotated_sequence(filename):
+def wav_to_beat_annotated_sequence(filename, use_atmm = True, save_mid = False, outfile = None):
     if not filename.endswith('.wav'):
         print('file must be wav file')
         return None
 
     # Convert Wav to Midi file to convert to note sequence
-    tmp_mid_file = filename.split('.')[0]+'_tmp.mid'
-    wav_to_midi(filename,use_atmm=True,outfile=tmp_mid_file)
-
-    seq = note_seq.midi_file_to_note_sequence(tmp_mid_file)
+    if save_mid and outfile != None:
+        mid_file = outfile
+    else:
+        mid_file = filename.spllit('.')[0]+'_tmp.mid'
+    
+    wav_to_midi(filename,use_atmm=use_atmm,outfile=mid_file)
+    seq = note_seq.midi_file_to_note_sequence(mid_file)
 
     # Beat Extraction using AUBIO library
     # note that input file may be actual voice recording instead of a midi-converted-wav file
@@ -94,10 +95,13 @@ def wav_to_beat_annotated_sequence(filename):
     add_beat_annotations(seq,beats)
     
     # Delete temporary mid file
-    os.remove(tmp_mid_file)
+    if save_mid is False:
+        os.remove(mid_file)
+    else:
+        print('file %s saved as %s' % (filename, mid_file))
 
     return seq
-
+"""
 def wav_to_beat_annotated_sequence(filename, use_atmm = False):
     if not filename.endswith('.wav'):
         print('file must be wav file')
@@ -118,6 +122,7 @@ def wav_to_beat_annotated_sequence(filename, use_atmm = False):
     os.remove(tmp_mid_file)
 
     return seq
+"""
 
 def midi_to_beat_annotated_sequence(filename):
     """Converts a midi file into a note sequence with annotated beats"""
