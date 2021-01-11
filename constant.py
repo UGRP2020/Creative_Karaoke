@@ -1,0 +1,5 @@
+# constant
+GENRE_JAZZ = 0
+GENRE_RNB = 1
+GENRE_CLASSICAL = 2
+GENRE_ROCK = 3
